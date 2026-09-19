@@ -74,7 +74,7 @@ process.stdout.write('Repository policy is aligned.\n');
 
 function checkPolicy() {
   if (policy.schemaVersion !== 1) errors.push('repo-policy.json schemaVersion must be 1');
-  if (policy.productName !== 'TurboWarp-Extension-Template') {
+  if (policy.productName !== 'TurboWarp-KVS') {
     errors.push('repo-policy.json productName must match README.md H1');
   }
   if (policy.licensePolicy !== 'mpl-2.0') {
@@ -103,10 +103,10 @@ function checkPackageMetadata() {
   if (packageMetadata.engines?.node !== '>=22.18.0') {
     errors.push('package.json engines.node must be >=22.18.0');
   }
-  if (packageMetadata.repository?.url !== 'git+https://github.com/kubohiroya/turbowarp-extension-template.git') {
+  if (packageMetadata.repository?.url !== 'git+https://github.com/kubohiroya/turbowarp-kvs.git') {
     errors.push('package.json repository.url must point to the current repository');
   }
-  if (packageMetadata.bugs?.url !== 'https://github.com/kubohiroya/turbowarp-extension-template/issues') {
+  if (packageMetadata.bugs?.url !== 'https://github.com/kubohiroya/turbowarp-kvs/issues') {
     errors.push('package.json bugs.url must point to the current issue tracker');
   }
   for (const file of policy.requiredFiles) {
@@ -145,7 +145,7 @@ function checkReadmes() {
     errors.push('README.md must include a version-pinned package example');
   }
   if (!readme.includes('MPL-2.0')) errors.push('README.md License section must include MPL-2.0');
-  if (!readmeJa.startsWith('# TurboWarp-Extension-Template\n')) {
+  if (!readmeJa.startsWith('# TurboWarp-KVS\n')) {
     errors.push('README.ja.md must mirror the product H1');
   }
 }
@@ -179,7 +179,7 @@ async function checkPackContents() {
   for (const file of policy.requiredFiles) {
     if (!files.has(file)) errors.push(`npm pack must include ${file}`);
   }
-  if (!files.has('dist/example-extension.js')) {
+  if (!files.has('dist/kvs.js')) {
     errors.push('npm pack must include the generated extension bundle');
   }
   await access('pnpm-lock.yaml');

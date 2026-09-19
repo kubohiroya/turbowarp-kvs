@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "productName": "TurboWarp-Extension-Template",
-  "packageType": "extension-template",
+  "productName": "TurboWarp-KVS",
+  "packageType": "extension-composition",
   "licensePolicy": "mpl-2.0",
   "readmeLanguages": ["en", "ja"],
   "canonicalReadme": "README.md",
@@ -20,9 +20,8 @@
     "thirdPartyBundle": false
   },
   "migrationChecklist": [
-    "Replace placeholder package metadata with repository-specific values.",
-    "Keep LICENSE as the full Mozilla Public License 2.0 text unless policy records an exception.",
-    "Keep README.md as the canonical English entrypoint and README.ja.md for Japanese content.",
+    "Keep browser KVS storage isolated from Asset Manager databases.",
+    "Keep binary bytes out of Scratch values and manifests.",
     "Run pnpm run check before publishing generated artifacts."
   ]
 }

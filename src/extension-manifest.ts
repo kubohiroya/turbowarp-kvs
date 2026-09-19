@@ -1,6 +1,6 @@
 import type {Plugin} from 'vite';
 
-export const EXTENSION_MANIFEST_FORMAT_VERSION = 1 as const;
+export const EXTENSION_MANIFEST_FORMAT_VERSION = 2 as const;
 
 export interface ExtensionManifestArgument {
   id: string;
@@ -12,6 +12,11 @@ export interface ExtensionManifestBlock {
   opcode: string;
   blockType: string;
   arguments: ExtensionManifestArgument[];
+  resultType: 'boolean' | 'json' | 'string' | 'void';
+  effect: 'storage-read' | 'storage-write';
+  immutable: boolean;
+  errors: string[];
+  server: {supported: true; irOperation: string};
 }
 
 export interface ExtensionManifestMenu {
@@ -106,11 +111,33 @@ function normalizeBlock(
     return menu === undefined ? {id: argumentId, type} : {id: argumentId, type, menu};
   });
 
-  return {
+  return withServerMetadata({
     opcode,
     blockType,
     arguments: argumentsList.sort((left, right) => compareIds(left.id, right.id))
-  };
+  });
+}
+
+function withServerMetadata(
+  block: Pick<ExtensionManifestBlock, 'opcode' | 'blockType' | 'arguments'>
+): ExtensionManifestBlock {
+  const commonErrors = ['KVS_NAMESPACE_INVALID', 'KVS_KEY_INVALID', 'KVS_STORAGE_FAILURE'];
+  if (block.opcode === 'setValue') {
+    return {...block, resultType: 'void', effect: 'storage-write', immutable: false, errors: commonErrors, server: {supported: true, irOperation: 'kvs.setText'}};
+  }
+  if (block.opcode === 'getValue') {
+    return {...block, resultType: 'string', effect: 'storage-read', immutable: true, errors: commonErrors, server: {supported: true, irOperation: 'kvs.getText'}};
+  }
+  if (block.opcode === 'hasKey') {
+    return {...block, resultType: 'boolean', effect: 'storage-read', immutable: true, errors: commonErrors, server: {supported: true, irOperation: 'kvs.has'}};
+  }
+  if (block.opcode === 'deleteKey') {
+    return {...block, resultType: 'void', effect: 'storage-write', immutable: false, errors: commonErrors, server: {supported: true, irOperation: 'kvs.delete'}};
+  }
+  if (block.opcode === 'listKeys') {
+    return {...block, resultType: 'json', effect: 'storage-read', immutable: true, errors: commonErrors, server: {supported: true, irOperation: 'kvs.listKeys'}};
+  }
+  throw new TypeError(`Missing server metadata for block opcode: ${block.opcode}`);
 }
 
 function normalizeMenus(value: unknown): ExtensionManifestMenu[] {

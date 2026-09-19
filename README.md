@@ -1,115 +1,99 @@
-# TurboWarp-Extension-Template
+# TurboWarp-KVS
 
 [日本語](README.ja.md)
 
-A reusable TypeScript template for developing, testing, building, and releasing TurboWarp extensions with Vite.
-
-## User guide
-
-Create a repository from this template, replace the package and extension metadata, implement blocks in `src/extension.ts`, and keep generated artifacts checked in.
-
-The template package is version-pinned when it is used as a reference:
-
-```bash
-pnpm add --save-exact @kubohiroya/turbowarp-extension-template@0.4.0
-```
+Portable namespace/key storage for TurboWarp projects and server compilation. Text values use IndexedDB in the browser. The package also exports the IndexedDB/OPFS `BinaryObjectStore` contract extracted from TurboWarp Asset Manager; binary bytes never pass through Scratch string values or the extension manifest.
 
 ## What it does
 
-- builds a single TurboWarp-compatible JavaScript extension file;
-- emits a deterministic `dist/extension-manifest.json` API contract;
-- generates the README block reference from `src/block-definitions.json`;
-- verifies source, documentation, generated `dist/` output, repository policy, and npm package contents in one check.
+- Stores text values by explicit namespace and key.
+- Provides deterministic `get`, `set`, `has`, `delete`, and sorted `list` operations.
+- Publishes a format 2 manifest with explicit server-safe KVS operations.
+- Exports tested IndexedDB and OPFS binary object stores for Composition consumers.
 
 ## Requirements and safety
 
-- Node.js 22 or newer;
-- pnpm through Corepack;
-- TurboWarp's unsandboxed extension option only when your extension metadata sets `unsandboxed: true`.
-
-Only load generated extension code that you trust. Unsandboxed extensions run with browser page access.
+Load `dist/kvs.js` as an unsandboxed extension because browser persistence requires IndexedDB and OPFS. Namespaces are lowercase identifiers. Keys are NFC-normalized and reject NUL and traversal segments. KVS uses its own `tw-kvs-*` storage and never migrates or deletes Asset Manager databases.
 
 ## Installation
 
-```bash
-corepack enable
-pnpm install --frozen-lockfile
-```
-
-## Quick start
-
-1. Create a repository from this template.
-2. Update `package.json` metadata and `repo-policy.json`.
-3. Edit `src/config.ts`.
-4. Define blocks in `src/block-definitions.json`.
-5. Implement runtime behavior in `src/extension.ts`.
-6. Run `pnpm run docs`.
-7. Run `pnpm run check`.
-
-For continuous rebuilding during development:
-
-```bash
-pnpm run dev
+```sh
+pnpm add --save-exact @kubohiroya/turbowarp-kvs@0.1.0
 ```
 
 ## Block reference
 
 <!-- BEGIN GENERATED BLOCKS -->
 
-### `hello [NAME]`
+### `set [KEY] in [NAMESPACE] to [VALUE]`
 
-Returns a localized greeting for the supplied name.
+Stores a text value under a namespace and key.
+
+| Property | Value |
+|---|---|
+| Type | Command |
+| Opcode | `setValue` |
+| `NAMESPACE` | String, default: `app` |
+| `KEY` | String, default: `message` |
+| `VALUE` | String, default: `hello` |
+
+### `value of [KEY] in [NAMESPACE]`
+
+Returns a stored text value, or an empty string when absent.
 
 | Property | Value |
 |---|---|
 | Type | Reporter |
-| Opcode | `hello` |
-| `NAME` | String, default: `world` |
+| Opcode | `getValue` |
+| `NAMESPACE` | String, default: `app` |
+| `KEY` | String, default: `message` |
+
+### `[KEY] exists in [NAMESPACE]`
+
+Reports whether a key exists.
+
+| Property | Value |
+|---|---|
+| Type | Boolean |
+| Opcode | `hasKey` |
+| `NAMESPACE` | String, default: `app` |
+| `KEY` | String, default: `message` |
+
+### `delete [KEY] from [NAMESPACE]`
+
+Deletes a key if it exists.
+
+| Property | Value |
+|---|---|
+| Type | Command |
+| Opcode | `deleteKey` |
+| `NAMESPACE` | String, default: `app` |
+| `KEY` | String, default: `message` |
+
+### `keys in [NAMESPACE] as JSON`
+
+Returns a sorted JSON array of keys.
+
+| Property | Value |
+|---|---|
+| Type | Reporter |
+| Opcode | `listKeys` |
+| `NAMESPACE` | String, default: `app` |
 
 <!-- END GENERATED BLOCKS -->
 
-## Important behavior
+## Binary Composition API
 
-```text
-TypeScript source
-  -> Vite
-  -> vite-plugin-turbowarp-extension
-  -> dist/<extension-name>.js
-
-Extension config + block definitions
-  -> extension manifest plugin
-  -> dist/extension-manifest.json
-```
-
-The generated JavaScript is a single, non-minified TurboWarp extension file with Extension Gallery metadata and the standard `(function (Scratch) { ... })(Scratch);` wrapper.
-
-Each build emits `dist/extension-manifest.json` with `formatVersion: 1`. It records the extension ID, block opcodes and types, argument IDs and types, and menu references in a deterministic order. Tools such as `sb3-toolchain` can compare this contract before updating an embedded extension or migrating its ID. See [the architecture document](docs/architecture.md) and the [JSON Schema](schemas/extension-manifest.schema.json) for the v1 contract.
-
-## Compatibility
-
-The canonical README is `README.md`. Japanese documentation uses `README.ja.md`; new repositories should not create `README_ja.md`.
-
-Repository-level differences belong in `repo-policy.json`. Use policy exceptions for upstream forks, mixed-license content, legacy package names, or third-party bundles instead of weakening checks silently.
+Import `@kubohiroya/turbowarp-kvs/binary-object-store`. Callers provide size and SHA-256 integrity descriptors; implementations validate bytes and expose no base64 shortcut. Browser and server adapters share logical contracts, not physical bucket or filesystem paths.
 
 ## Development
 
-```bash
-pnpm run check
+```sh
+corepack enable
+pnpm install --frozen-lockfile
+pnpm check
 ```
-
-The check runs type checking, linting, tests, generated README validation, `dist/` reproducibility, repository policy validation, and an npm package dry run.
-
-## Release
-
-Keep `package.json` as the version source of truth. Before publishing, run:
-
-```bash
-pnpm run check
-npm pack --dry-run --ignore-scripts
-```
-
-Release artifacts include `dist/example-extension.js`, `dist/extension-manifest.json`, `README.md`, `README.ja.md`, and `LICENSE`.
 
 ## License
 
-SPDX-License-Identifier: MPL-2.0
+MPL-2.0.

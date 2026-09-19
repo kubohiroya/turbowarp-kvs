@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "rootDir": "src",
+    "outDir": "dist/modules",
+    "declaration": true,
+    "noEmit": false,
+    "isolatedModules": false
+  },
+  "include": [
+    "src/binary-object-store.ts",
+    "src/binary-bundle-store.ts",
+    "src/opfs-binary-bundle-store.ts",
+    "src/session-binary-backing.ts",
+    "src/kvs-store.ts"
+  ]
+}

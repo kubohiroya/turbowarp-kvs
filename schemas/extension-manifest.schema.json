@@ -1,19 +1,19 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/kubohiroya/turbowarp-extension-template/main/schemas/extension-manifest.schema.json",
-  "title": "TurboWarp Extension API Manifest",
+  "$id": "https://raw.githubusercontent.com/kubohiroya/turbowarp-kvs/main/schemas/extension-manifest.schema.json",
+  "title": "TurboWarp KVS Server Operation Manifest",
   "type": "object",
   "additionalProperties": false,
   "required": ["formatVersion", "id", "blocks", "menus"],
   "properties": {
-    "formatVersion": {"const": 1},
+    "formatVersion": {"const": 2},
     "id": {"type": "string", "pattern": "^[a-z0-9]+$"},
     "blocks": {
       "type": "array",
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["opcode", "blockType", "arguments"],
+        "required": ["opcode", "blockType", "arguments", "resultType", "effect", "immutable", "errors", "server"],
         "properties": {
           "opcode": {"type": "string", "minLength": 1},
           "blockType": {"type": "string", "minLength": 1},
@@ -28,6 +28,19 @@
                 "type": {"type": "string", "minLength": 1},
                 "menu": {"type": "string", "minLength": 1}
               }
+            }
+          },
+          "resultType": {"enum": ["boolean", "json", "string", "void"]},
+          "effect": {"enum": ["storage-read", "storage-write"]},
+          "immutable": {"type": "boolean"},
+          "errors": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "server": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["supported", "irOperation"],
+            "properties": {
+              "supported": {"const": true},
+              "irOperation": {"type": "string", "pattern": "^kvs\\.[A-Za-z][A-Za-z0-9]*$"}
             }
           }
         }

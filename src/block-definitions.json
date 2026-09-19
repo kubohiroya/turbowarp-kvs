@@ -1,14 +1,10 @@
 {
-  "extensionName": "TurboWarp-Example-Extension",
+  "extensionName": "KVS",
   "blocks": [
-    {
-      "opcode": "hello",
-      "blockType": "REPORTER",
-      "text": "hello [NAME]",
-      "description": "Returns a localized greeting for the supplied name.",
-      "arguments": {
-        "NAME": {"type": "STRING", "defaultValue": "world"}
-      }
-    }
+    {"opcode":"setValue","blockType":"COMMAND","text":"set [KEY] in [NAMESPACE] to [VALUE]","description":"Stores a text value under a namespace and key.","arguments":{"NAMESPACE":{"type":"STRING","defaultValue":"app"},"KEY":{"type":"STRING","defaultValue":"message"},"VALUE":{"type":"STRING","defaultValue":"hello"}}},
+    {"opcode":"getValue","blockType":"REPORTER","text":"value of [KEY] in [NAMESPACE]","description":"Returns a stored text value, or an empty string when absent.","arguments":{"NAMESPACE":{"type":"STRING","defaultValue":"app"},"KEY":{"type":"STRING","defaultValue":"message"}}},
+    {"opcode":"hasKey","blockType":"BOOLEAN","text":"[KEY] exists in [NAMESPACE]","description":"Reports whether a key exists.","arguments":{"NAMESPACE":{"type":"STRING","defaultValue":"app"},"KEY":{"type":"STRING","defaultValue":"message"}}},
+    {"opcode":"deleteKey","blockType":"COMMAND","text":"delete [KEY] from [NAMESPACE]","description":"Deletes a key if it exists.","arguments":{"NAMESPACE":{"type":"STRING","defaultValue":"app"},"KEY":{"type":"STRING","defaultValue":"message"}}},
+    {"opcode":"listKeys","blockType":"REPORTER","text":"keys in [NAMESPACE] as JSON","description":"Returns a sorted JSON array of keys.","arguments":{"NAMESPACE":{"type":"STRING","defaultValue":"app"}}}
   ]
 }

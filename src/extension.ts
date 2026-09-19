@@ -1,7 +1,8 @@
-import {extensionConfig} from './config';
-import definitions from './block-definitions.json';
+import {extensionConfig} from './config.js';
+import definitions from './block-definitions.json' with {type: 'json'};
+import {IndexedDbKvsStore, type KvsStore} from './kvs-store.js';
 
-type BlockTypeName = 'REPORTER';
+type BlockTypeName = 'COMMAND' | 'REPORTER' | 'BOOLEAN';
 type ArgumentTypeName = 'STRING';
 
 interface DefinitionArgument {
@@ -19,7 +20,9 @@ interface BlockDefinition {
 
 const blockDefinitions = definitions.blocks as readonly BlockDefinition[];
 
-export class ExampleExtension implements TurboWarpExtension {
+export class KvsExtension implements TurboWarpExtension {
+  public constructor(private readonly store: KvsStore = new IndexedDbKvsStore()) {}
+
   public getInfo(): Record<string, unknown> {
     return {
       id: extensionConfig.id,
@@ -30,14 +33,24 @@ export class ExampleExtension implements TurboWarpExtension {
     };
   }
 
-  public hello(args: {NAME: unknown}): string {
-    return Scratch.translate(
-      {
-        default: 'Hello, {name}!',
-        description: '{name} is replaced with the value supplied to the block.'
-      },
-      {name: Scratch.Cast.toString(args.NAME)}
-    );
+  public async setValue(args: Record<string, unknown>): Promise<void> {
+    await this.store.set(text(args.NAMESPACE), text(args.KEY), text(args.VALUE));
+  }
+
+  public async getValue(args: Record<string, unknown>): Promise<string> {
+    return (await this.store.get(text(args.NAMESPACE), text(args.KEY))) ?? '';
+  }
+
+  public async hasKey(args: Record<string, unknown>): Promise<boolean> {
+    return this.store.has(text(args.NAMESPACE), text(args.KEY));
+  }
+
+  public async deleteKey(args: Record<string, unknown>): Promise<void> {
+    await this.store.delete(text(args.NAMESPACE), text(args.KEY));
+  }
+
+  public async listKeys(args: Record<string, unknown>): Promise<string> {
+    return JSON.stringify(await this.store.list(text(args.NAMESPACE)));
   }
 
   private toScratchBlock(block: BlockDefinition): Record<string, unknown> {
@@ -48,12 +61,13 @@ export class ExampleExtension implements TurboWarpExtension {
       arguments: Object.fromEntries(
         Object.entries(block.arguments).map(([name, argument]) => [
           name,
-          {
-            type: Scratch.ArgumentType[argument.type],
-            defaultValue: argument.defaultValue
-          }
+          {type: Scratch.ArgumentType[argument.type], defaultValue: argument.defaultValue}
         ])
       )
     };
   }
+}
+
+function text(value: unknown): string {
+  return Scratch.Cast.toString(value);
 }

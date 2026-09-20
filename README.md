@@ -86,6 +86,22 @@ Returns a sorted JSON array of keys.
 
 Import `@kubohiroya/turbowarp-kvs/binary-object-store`. Callers provide size and SHA-256 integrity descriptors; implementations validate bytes and expose no base64 shortcut. Browser and server adapters share logical contracts, not physical bucket or filesystem paths.
 
+### Migrating from TurboWarp Asset Manager
+
+`@kubohiroya/turbowarp-asset-manager` is deprecated. Replace its binary Composition exports with
+the matching KVS subpath:
+
+| Deprecated Asset Manager export | KVS import |
+|---|---|
+| `createIndexedDBBinaryObjectStore`, `createOpfsBinaryObjectStore` | `@kubohiroya/turbowarp-kvs/binary-object-store` |
+| `createBinaryBundleStore` | `@kubohiroya/turbowarp-kvs/binary-bundle-store` |
+| `createSessionBinaryBacking` | `@kubohiroya/turbowarp-kvs/session-binary-backing` |
+
+KVS uses `KVS_BINARY_*` and `KVS_SESSION_BINARY_*` error codes and its own `tw-kvs-*` IndexedDB
+and OPFS names. It never deletes or silently imports Asset Manager databases. Cache-like data may be
+recreated lazily; applications that treat stored bytes as durable records must provide an explicit,
+verified migration before removing the old database.
+
 ## Development
 
 ```sh

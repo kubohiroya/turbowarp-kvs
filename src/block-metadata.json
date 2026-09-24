@@ -1,0 +1,37 @@
+{
+  "setValue": {
+    "resultType": "void",
+    "effect": "storage-write",
+    "immutable": false,
+    "errors": ["KVS_NAMESPACE_INVALID", "KVS_KEY_INVALID", "KVS_STORAGE_FAILURE"],
+    "server": {"supported": true, "irOperation": "kvs.setText"}
+  },
+  "getValue": {
+    "resultType": "string",
+    "effect": "storage-read",
+    "immutable": true,
+    "errors": ["KVS_NAMESPACE_INVALID", "KVS_KEY_INVALID", "KVS_STORAGE_FAILURE"],
+    "server": {"supported": true, "irOperation": "kvs.getText"}
+  },
+  "hasKey": {
+    "resultType": "boolean",
+    "effect": "storage-read",
+    "immutable": true,
+    "errors": ["KVS_NAMESPACE_INVALID", "KVS_KEY_INVALID", "KVS_STORAGE_FAILURE"],
+    "server": {"supported": true, "irOperation": "kvs.has"}
+  },
+  "deleteKey": {
+    "resultType": "void",
+    "effect": "storage-write",
+    "immutable": false,
+    "errors": ["KVS_NAMESPACE_INVALID", "KVS_KEY_INVALID", "KVS_STORAGE_FAILURE"],
+    "server": {"supported": true, "irOperation": "kvs.delete"}
+  },
+  "listKeys": {
+    "resultType": "json",
+    "effect": "storage-read",
+    "immutable": true,
+    "errors": ["KVS_NAMESPACE_INVALID", "KVS_KEY_INVALID", "KVS_STORAGE_FAILURE"],
+    "server": {"supported": true, "irOperation": "kvs.listKeys"}
+  }
+}

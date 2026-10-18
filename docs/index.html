@@ -4,13 +4,36 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TurboWarp KVS</title>
+<style id="block-reference-style">
+#extension-block-reference{max-width:72rem;margin:2rem auto;padding:1rem;line-height:1.6;overflow-wrap:anywhere}
+#extension-block-reference .block-reference-entry{display:block;scroll-margin-top:6rem;margin:2rem 0;padding:1rem;border:1px solid currentColor;border-radius:.5rem}
+#extension-block-reference .block-reference-table{overflow-x:auto}
+#extension-block-reference table{border-collapse:collapse;width:100%}
+#extension-block-reference th,#extension-block-reference td{text-align:left;vertical-align:top;border:1px solid currentColor;padding:.5rem}
+#extension-block-reference code{white-space:pre-wrap}
+#extension-block-reference a:focus-visible{outline:3px solid currentColor;outline-offset:3px}
+</style>
 </head>
 <body>
-  <main>
+  <main><p lang="en" class="complete-block-reference-link"><a href="#extension-block-reference">Complete block reference (5 blocks)</a></p>
     <h1>TurboWarp KVS</h1>
     <p>Portable namespace/key text and binary storage for TurboWarp projects.</p>
     <p>Load <code>dist/kvs.js</code> as an unsandboxed extension. See the repository README for the block and Composition APIs.</p>
     <p><a href="https://github.com/kubohiroya/turbowarp-kvs">Source and issues</a></p>
   </main>
+<!-- BEGIN COMPLETE BLOCK REFERENCE -->
+<section lang="en" id="extension-block-reference" aria-labelledby="block-reference-title">
+<h2 id="block-reference-title">KVS: complete block reference</h2>
+<p>All 5 blocks are documented below, including compatibility blocks and blocks available through optional features. Select a block to read its behavior, arguments, default values, and menu choices. Each block has a permanent link.</p>
+<nav aria-label="Block reference"><ul><li><a href="#block-setValue"><code>set [KEY] in [NAMESPACE] to [VALUE]</code></a></li>
+<li><a href="#block-getValue"><code>value of [KEY] in [NAMESPACE]</code></a></li>
+<li><a href="#block-hasKey"><code>[KEY] exists in [NAMESPACE]</code></a></li>
+<li><a href="#block-deleteKey"><code>delete [KEY] from [NAMESPACE]</code></a></li>
+<li><a href="#block-listKeys"><code>keys in [NAMESPACE] as JSON</code></a></li>
+</ul></nav>
+<article id="block-setValue" class="block-reference-entry"><h3><code>set [KEY] in [NAMESPACE] to [VALUE]</code></h3><p>Stores a text value under a namespace and key.</p><p>Block type: COMMAND. Opcode: <code>setValue</code>. <a href="#block-setValue">Permanent link</a></p><div class="block-reference-table"><table><thead><tr><th>Argument</th><th>Type</th><th>Default value</th><th>Menu choices</th></tr></thead><tbody><tr><th scope="row"><code>NAMESPACE</code></th><td>STRING</td><td><code>app</code></td><td></td></tr><tr><th scope="row"><code>KEY</code></th><td>STRING</td><td><code>message</code></td><td></td></tr><tr><th scope="row"><code>VALUE</code></th><td>STRING</td><td><code>hello</code></td><td></td></tr></tbody></table></div></article><article id="block-getValue" class="block-reference-entry"><h3><code>value of [KEY] in [NAMESPACE]</code></h3><p>Returns a stored text value, or an empty string when absent.</p><p>Block type: REPORTER. Opcode: <code>getValue</code>. <a href="#block-getValue">Permanent link</a></p><div class="block-reference-table"><table><thead><tr><th>Argument</th><th>Type</th><th>Default value</th><th>Menu choices</th></tr></thead><tbody><tr><th scope="row"><code>NAMESPACE</code></th><td>STRING</td><td><code>app</code></td><td></td></tr><tr><th scope="row"><code>KEY</code></th><td>STRING</td><td><code>message</code></td><td></td></tr></tbody></table></div></article><article id="block-hasKey" class="block-reference-entry"><h3><code>[KEY] exists in [NAMESPACE]</code></h3><p>Reports whether a key exists.</p><p>Block type: BOOLEAN. Opcode: <code>hasKey</code>. <a href="#block-hasKey">Permanent link</a></p><div class="block-reference-table"><table><thead><tr><th>Argument</th><th>Type</th><th>Default value</th><th>Menu choices</th></tr></thead><tbody><tr><th scope="row"><code>NAMESPACE</code></th><td>STRING</td><td><code>app</code></td><td></td></tr><tr><th scope="row"><code>KEY</code></th><td>STRING</td><td><code>message</code></td><td></td></tr></tbody></table></div></article><article id="block-deleteKey" class="block-reference-entry"><h3><code>delete [KEY] from [NAMESPACE]</code></h3><p>Deletes a key if it exists.</p><p>Block type: COMMAND. Opcode: <code>deleteKey</code>. <a href="#block-deleteKey">Permanent link</a></p><div class="block-reference-table"><table><thead><tr><th>Argument</th><th>Type</th><th>Default value</th><th>Menu choices</th></tr></thead><tbody><tr><th scope="row"><code>NAMESPACE</code></th><td>STRING</td><td><code>app</code></td><td></td></tr><tr><th scope="row"><code>KEY</code></th><td>STRING</td><td><code>message</code></td><td></td></tr></tbody></table></div></article><article id="block-listKeys" class="block-reference-entry"><h3><code>keys in [NAMESPACE] as JSON</code></h3><p>Returns a sorted JSON array of keys.</p><p>Block type: REPORTER. Opcode: <code>listKeys</code>. <a href="#block-listKeys">Permanent link</a></p><div class="block-reference-table"><table><thead><tr><th>Argument</th><th>Type</th><th>Default value</th><th>Menu choices</th></tr></thead><tbody><tr><th scope="row"><code>NAMESPACE</code></th><td>STRING</td><td><code>app</code></td><td></td></tr></tbody></table></div></article>
+<p><a href="https://github.com/kubohiroya/turbowarp-kvs/blob/main/README.md">Repository guide and examples</a></p>
+</section>
+<!-- END COMPLETE BLOCK REFERENCE -->
 </body>
 </html>

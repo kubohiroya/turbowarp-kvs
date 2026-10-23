@@ -823,6 +823,7 @@ function createEstablishedBacking({ input, options, mode, database, source, warn
     let fatalError = null;
     let heartbeat = null;
     let closingDatabase = false;
+    let recordsDeleted = false;
     const notifyFatal = (error) => {
         if (!fatalError) {
             fatalError = error;
@@ -847,19 +848,21 @@ function createEstablishedBacking({ input, options, mode, database, source, warn
         if (fatalError)
             throw fatalError;
     };
-    if (database) {
+    const watchDatabase = (watchedDatabase) => {
         const closeFailure = () => {
             if (closingDatabase || disposed)
                 return;
             notifyFatal(sessionError('KVS_SESSION_BINARY_CONNECTION_CLOSED', 'The session binary IndexedDB connection closed unexpectedly.'));
         };
-        database.addEventListener('versionchange', () => {
+        watchedDatabase.addEventListener('versionchange', () => {
             closeFailure();
             closingDatabase = true;
-            database.close();
+            watchedDatabase.close();
         });
-        database.addEventListener('close', closeFailure);
-    }
+        watchedDatabase.addEventListener('close', closeFailure);
+    };
+    if (database)
+        watchDatabase(database);
     const track = (operation) => {
         activeOperations.add(operation);
         void operation.then(() => activeOperations.delete(operation), () => activeOperations.delete(operation));
@@ -926,27 +929,38 @@ function createEstablishedBacking({ input, options, mode, database, source, warn
             if (disposePromise)
                 return disposePromise;
             disposed = true;
-            controller.abort();
-            if (heartbeat !== null) {
-                clearInterval(heartbeat);
-                heartbeat = null;
-            }
-            disposePromise = (async () => {
+            // Register before abort listeners or source cleanup can synchronously reenter disposal.
+            const operation = Promise.resolve().then(async () => {
                 await Promise.allSettled([...activeOperations]);
                 const errors = [];
                 if (mode === 'session' && database) {
                     try {
-                        await deleteSessionRecords(database, input.sessionId);
+                        if (!recordsDeleted) {
+                            try {
+                                await deleteSessionRecords(database, input.sessionId);
+                            }
+                            catch (error) {
+                                if (errorCode(error) !== 'KVS_SESSION_BINARY_CONNECTION_CLOSED')
+                                    throw error;
+                                // Reopen only for cleanup; the session remains permanently closed to reads.
+                                database = await openDatabase(options);
+                                watchDatabase(database);
+                                await deleteSessionRecords(database, input.sessionId);
+                            }
+                            recordsDeleted = true;
+                        }
+                        closingDatabase = true;
+                        database.close();
+                        database = null;
                     }
                     catch (error) {
                         errors.push(error);
                     }
-                    closingDatabase = true;
-                    database.close();
                 }
                 if (source) {
                     try {
                         await releaseSource(source);
+                        source = null;
                     }
                     catch (error) {
                         errors.push(error);
@@ -955,8 +969,18 @@ function createEstablishedBacking({ input, options, mode, database, source, warn
                 if (errors.length > 0) {
                     throw sessionError('KVS_SESSION_BINARY_CLEANUP_FAILED', 'Session binary backing disposal failed.', new AggregateError(errors));
                 }
-            })();
-            return disposePromise;
+            });
+            disposePromise = operation;
+            void operation.catch(() => {
+                if (disposePromise === operation)
+                    disposePromise = null;
+            });
+            controller.abort();
+            if (heartbeat !== null) {
+                clearInterval(heartbeat);
+                heartbeat = null;
+            }
+            return operation;
         }
     };
     return Object.freeze(backing);
@@ -1007,6 +1031,7 @@ async function createObjectBackedSession(input, options, rawOptions, signal) {
         await store.release();
         throw error;
     }
+    const pendingDeletion = new Set(committed);
     const status = store.getBackendStatus();
     const controller = new AbortController();
     const activeOperations = new Set();
@@ -1101,21 +1126,29 @@ async function createObjectBackedSession(input, options, rawOptions, signal) {
             if (disposePromise)
                 return disposePromise;
             disposed = true;
+            const operation = Promise.resolve().then(async () => {
+                await Promise.allSettled([...activeOperations]);
+                const results = await Promise.allSettled([...pendingDeletion].map(async (key) => {
+                    await store.delete(key);
+                    pendingDeletion.delete(key);
+                }));
+                const failures = results.filter((result) => result.status === 'rejected');
+                if (failures.length > 0) {
+                    throw sessionError('KVS_SESSION_BINARY_CLEANUP_FAILED', 'Session OPFS binary cleanup failed.', new AggregateError(failures.map((result) => result.reason)));
+                }
+                await store.release();
+            });
+            disposePromise = operation;
+            void operation.catch(() => {
+                if (disposePromise === operation)
+                    disposePromise = null;
+            });
             controller.abort();
             if (heartbeat !== null) {
                 clearInterval(heartbeat);
                 heartbeat = null;
             }
-            disposePromise = (async () => {
-                await Promise.allSettled([...activeOperations]);
-                const results = await Promise.allSettled(committed.map((key) => store.delete(key)));
-                await store.release();
-                const failures = results.filter((result) => result.status === 'rejected');
-                if (failures.length > 0) {
-                    throw sessionError('KVS_SESSION_BINARY_CLEANUP_FAILED', 'Session OPFS binary cleanup failed.', new AggregateError(failures.map((result) => result.reason)));
-                }
-            })();
-            return disposePromise;
+            return operation;
         }
     };
     return Object.freeze(backing);

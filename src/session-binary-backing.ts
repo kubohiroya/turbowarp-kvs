@@ -1272,6 +1272,7 @@ function createEstablishedBacking({
   let fatalError: Error | null = null;
   let heartbeat: ReturnType<typeof setInterval> | null = null;
   let closingDatabase = false;
+  let recordsDeleted = false;
 
   const notifyFatal = (error: Error): Error => {
     if (!fatalError) {
@@ -1300,7 +1301,7 @@ function createEstablishedBacking({
     if (fatalError) throw fatalError;
   };
 
-  if (database) {
+  const watchDatabase = (watchedDatabase: IDBDatabase) => {
     const closeFailure = () => {
       if (closingDatabase || disposed) return;
       notifyFatal(
@@ -1310,13 +1311,14 @@ function createEstablishedBacking({
         )
       );
     };
-    database.addEventListener('versionchange', () => {
+    watchedDatabase.addEventListener('versionchange', () => {
       closeFailure();
       closingDatabase = true;
-      database.close();
+      watchedDatabase.close();
     });
-    database.addEventListener('close', closeFailure);
-  }
+    watchedDatabase.addEventListener('close', closeFailure);
+  };
+  if (database) watchDatabase(database);
 
   const track = <T>(operation: Promise<T>): Promise<T> => {
     activeOperations.add(operation);
@@ -1401,26 +1403,35 @@ function createEstablishedBacking({
     dispose() {
       if (disposePromise) return disposePromise;
       disposed = true;
-      controller.abort();
-      if (heartbeat !== null) {
-        clearInterval(heartbeat);
-        heartbeat = null;
-      }
-      disposePromise = (async () => {
+      // Register before abort listeners or source cleanup can synchronously reenter disposal.
+      const operation = Promise.resolve().then(async () => {
         await Promise.allSettled([...activeOperations]);
         const errors: unknown[] = [];
         if (mode === 'session' && database) {
           try {
-            await deleteSessionRecords(database, input.sessionId);
+            if (!recordsDeleted) {
+              try {
+                await deleteSessionRecords(database, input.sessionId);
+              } catch (error) {
+                if (errorCode(error) !== 'KVS_SESSION_BINARY_CONNECTION_CLOSED') throw error;
+                // Reopen only for cleanup; the session remains permanently closed to reads.
+                database = await openDatabase(options);
+                watchDatabase(database);
+                await deleteSessionRecords(database, input.sessionId);
+              }
+              recordsDeleted = true;
+            }
+            closingDatabase = true;
+            database.close();
+            database = null;
           } catch (error) {
             errors.push(error);
           }
-          closingDatabase = true;
-          database.close();
         }
         if (source) {
           try {
             await releaseSource(source);
+            source = null;
           } catch (error) {
             errors.push(error);
           }
@@ -1432,8 +1443,17 @@ function createEstablishedBacking({
             new AggregateError(errors)
           );
         }
-      })();
-      return disposePromise;
+      });
+      disposePromise = operation;
+      void operation.catch(() => {
+        if (disposePromise === operation) disposePromise = null;
+      });
+      controller.abort();
+      if (heartbeat !== null) {
+        clearInterval(heartbeat);
+        heartbeat = null;
+      }
+      return operation;
     }
   };
   return Object.freeze(backing);
@@ -1490,6 +1510,7 @@ async function createObjectBackedSession(
     throw error;
   }
 
+  const pendingDeletion = new Set(committed);
   const status = store.getBackendStatus();
   const controller = new AbortController();
   const activeOperations = new Set<Promise<unknown>>();
@@ -1579,15 +1600,12 @@ async function createObjectBackedSession(
     dispose() {
       if (disposePromise) return disposePromise;
       disposed = true;
-      controller.abort();
-      if (heartbeat !== null) {
-        clearInterval(heartbeat);
-        heartbeat = null;
-      }
-      disposePromise = (async () => {
+      const operation = Promise.resolve().then(async () => {
         await Promise.allSettled([...activeOperations]);
-        const results = await Promise.allSettled(committed.map((key) => store.delete(key)));
-        await store.release();
+        const results = await Promise.allSettled([...pendingDeletion].map(async (key) => {
+          await store.delete(key);
+          pendingDeletion.delete(key);
+        }));
         const failures = results.filter((result) => result.status === 'rejected');
         if (failures.length > 0) {
           throw sessionError(
@@ -1596,8 +1614,18 @@ async function createObjectBackedSession(
             new AggregateError(failures.map((result) => (result as PromiseRejectedResult).reason))
           );
         }
-      })();
-      return disposePromise;
+        await store.release();
+      });
+      disposePromise = operation;
+      void operation.catch(() => {
+        if (disposePromise === operation) disposePromise = null;
+      });
+      controller.abort();
+      if (heartbeat !== null) {
+        clearInterval(heartbeat);
+        heartbeat = null;
+      }
+      return operation;
     }
   };
   return Object.freeze(backing);

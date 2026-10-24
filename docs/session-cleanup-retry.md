@@ -3,7 +3,8 @@
 2026-10-23〜24実装。基準はmain `b546b32`、作業branchは`codex/fix-session-cleanup-retry`。
 追跡はAppの[Issue #775](https://github.com/kubohiroya/turbowarp-kamishibai-app/issues/775)と
 [#780](https://github.com/kubohiroya/turbowarp-kamishibai-app/issues/780)。
-source・回帰テスト・本書をPRでmainへ統合する。npmの版と公開は別途扱う。
+source・回帰テスト・本書はPR #5（main `cefe215`）へ統合済み。
+成立済みsessionの解放再試行修正を含むnpm 0.2.1を2026-10-24に公開済み。
 
 成立済みdirect/IDB sessionは、dispose要求後の通常get/lease更新を閉じたまま、
 失敗したsource cleanupとsession削除を明示disposeで再試行する。
@@ -18,7 +19,7 @@ object-backed sessionは削除失敗keyだけを保持し、全key削除前に�
 Appのローカル依存接続1件、およびChrome 155 native IDBのtransaction abort/接続closeの2条件も確認した。
 他sessionと呼出側コピーを維持し、対象sessionの明示再試行後だけレコードを削除する。
 
-公開済みnpm 0.2.0は未変更。App依存固定と通常npm配布物での検証には、別途この差分の配布が必要である。
+npm 0.2.0の配布物は差し替えない。Appは0.2.1へ依存固定し、通常npm配布物で接続を確認した。
 成立前の部分作成失敗でcleanupも失敗した場合、rejectされたAPIから再試行ownerを公開する経路は残務。
 切戻しはsource・回帰・本書を一式で戻す。API名・型とstorage schemaは変更しない。
 
@@ -35,4 +36,24 @@ DB削除後の明示disposeで完了することを確認した。新schemaへ�
 追加2条件はfake-indexeddbの結果で、native OPFS・物理ディスク回収の証明ではない。
 既存Chrome native IDB 1件・2条件とApp接続1件も修正後に再確認した。
 App側の実story camera lifecycleの停止失敗・同期再入・明示再試行はApp回帰で確認する。
-通常npm 0.2.0への反映、成立前cleanup失敗・下位OPFS資源の残務は変更しない。
+Appの通常npm依存経路への接続は0.2.1で確認済み。成立前cleanup失敗・下位OPFS資源の残務は変更しない。
+
+## npm 0.2.1公開記録（2026-10-24）
+
+- [npm 0.2.1](https://www.npmjs.com/package/@kubohiroya/turbowarp-kvs/v/0.2.1)をpublic/latestで公開。
+  修正のsource基準はPR #5 / main `cefe215994761313c975eb025062c8b4bf3ef1ea`。
+- registryのversion/latestとsha512 integrityを照合し、取得し直したtarballが公開前候補とバイト一致した。
+  shasum: `5a6edc4c31c14b4affffcbbbf7808ea842afb86f`、
+  SHA-256: `ab8351b14c543508eca38a9ac66dc86ef89cfe9ec8b2d611501781d820792d69`。
+  公開後の本書への記録追加はGit側の変更であり、公開済みtarballは差し替えない。
+- KVS 6ファイル30テスト・型・対象lint・build・配布構成の検査成功。
+  Appの通常npm経路で関連171件＋pin/出典2件、生成runtime一致・profile2件、
+  Chrome 155のnative IndexedDB 1件2条件が成功した。ソースalias・file依存は使用しない。
+- Appの依存更新・3生成runtime・回帰・設計書は、Appの別PRで統合する。
+  既存Appリリースと凍結成果物の差し替え、新しいApp npm/SB3/Pages公開は行わない。
+- Firefoxはメジャーリリース時のみ、Safariは対象外。今回の検証でどちらも起動していない。
+
+受け入れ条件は公開済み版・hashの照合、READMEの導入版とpackage versionの一致、
+KVS修正を通常npm経路で利用できること。成立前cleanup失敗・下位OPFS資源は引き続き残務。
+問題時は本PRの版・導入例・記録をまとめてrevertする。0.2.0へ戻すと既知の解放再試行の制限も戻る。
+公開済み0.2.1は同版で再公開しない。

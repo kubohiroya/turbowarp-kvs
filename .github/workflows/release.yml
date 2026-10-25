@@ -1,6 +1,7 @@
 name: Release
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - 'v*'
@@ -10,6 +11,7 @@ permissions:
 
 jobs:
   release:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,3 +31,27 @@ jobs:
           files: |
             dist/*.js
             turbowarp-extension.zip
+
+  publish-existing:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Install OIDC-capable npm
+        run: npm install --global npm@11.19.0
+      - name: Download verified release artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download v0.3.0 --repo kubohiroya/turbowarp-kvs --pattern kubohiroya-turbowarp-kvs-0.3.0.tgz
+          echo '0b2c5970045a5c5d3cdf0f43d7fcf01530471787  kubohiroya-turbowarp-kvs-0.3.0.tgz' | sha1sum --check
+          tar -xOf kubohiroya-turbowarp-kvs-0.3.0.tgz package/package.json > package-metadata.json
+          node --input-type=module -e "import fs from 'node:fs'; const p = JSON.parse(fs.readFileSync('package-metadata.json')); if (p.name !== '@kubohiroya/turbowarp-kvs' || p.version !== '0.3.0') throw new Error('Unexpected package');"
+      - name: Publish verified tarball with provenance
+        run: npm publish ./kubohiroya-turbowarp-kvs-0.3.0.tgz --access public --provenance

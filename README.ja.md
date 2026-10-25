@@ -20,7 +20,7 @@ namespaceはlowercase identifierに限定します。keyはNFC正規化し、NUL
 ## インストール
 
 ```sh
-pnpm add --save-exact @kubohiroya/turbowarp-kvs@0.2.1
+pnpm add --save-exact @kubohiroya/turbowarp-kvs@0.3.0
 ```
 
 詳細なblock一覧と開発手順は[英語版](README.md)を参照してください。

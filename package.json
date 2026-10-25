@@ -45,6 +45,7 @@
     }
   },
   "files": [
+    "assets/",
     "dist/",
     "docs/",
     "src/",

@@ -1,5 +1,7 @@
 # TurboWarp-KVS
 
+<img src="assets/block-icon.svg" alt="" width="48" height="48">
+
 [日本語](README.ja.md)
 
 Portable namespace/key storage for TurboWarp projects and server compilation. Text values use IndexedDB in the browser. The package also exports the IndexedDB/OPFS `BinaryObjectStore` contract extracted from TurboWarp Asset Manager; binary bytes never pass through Scratch string values or the extension manifest.

@@ -1,5 +1,7 @@
 # TurboWarp-KVS
 
+<img src="assets/block-icon.svg" alt="" width="48" height="48">
+
 [English](README.md)
 
 TurboWarp projectとserver compilerで共通利用するnamespace/key型の永続storeです。text valueはbrowserのIndexedDBへ保存します。TurboWarp Asset Managerから抽出したIndexedDB/OPFS対応`BinaryObjectStore`も公開し、binary bytesをScratch文字列やmanifestへ埋め込みません。

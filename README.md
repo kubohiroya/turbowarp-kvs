@@ -107,6 +107,7 @@ verified migration before removing the old database.
 ## Development
 
 ```sh
+npm install --global corepack@latest
 corepack enable
 pnpm install --frozen-lockfile
 pnpm check

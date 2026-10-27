@@ -1,0 +1,363 @@
+{
+  "targets": [
+    {
+      "isStage": true,
+      "name": "Stage",
+      "variables": {
+        "sample-state": [
+          "Sample state",
+          ""
+        ],
+        "score": [
+          "Read score",
+          ""
+        ],
+        "exists": [
+          "Exists before deletion",
+          ""
+        ],
+        "deleted": [
+          "Exists after deletion",
+          ""
+        ]
+      },
+      "lists": {},
+      "broadcasts": {},
+      "blocks": {
+        "b1": {
+          "opcode": "event_whenflagclicked",
+          "parent": null,
+          "next": "b2",
+          "inputs": {},
+          "fields": {},
+          "shadow": false,
+          "topLevel": true,
+          "x": 35,
+          "y": 35
+        },
+        "b2": {
+          "opcode": "data_setvariableto",
+          "parent": "b1",
+          "next": "b3",
+          "inputs": {
+            "VALUE": [
+              1,
+              [
+                10,
+                "Running"
+              ]
+            ]
+          },
+          "fields": {
+            "VARIABLE": [
+              "Sample state",
+              "sample-state"
+            ]
+          },
+          "shadow": false,
+          "topLevel": false
+        },
+        "b3": {
+          "opcode": "kubohiroyakvs_setValue",
+          "parent": "b2",
+          "next": "b4",
+          "inputs": {
+            "NAMESPACE": [
+              1,
+              [
+                10,
+                "turbowarp-kvs-sample"
+              ]
+            ],
+            "KEY": [
+              1,
+              [
+                10,
+                "sample-score"
+              ]
+            ],
+            "VALUE": [
+              1,
+              [
+                10,
+                "42"
+              ]
+            ]
+          },
+          "fields": {},
+          "shadow": false,
+          "topLevel": false
+        },
+        "b4": {
+          "opcode": "data_setvariableto",
+          "parent": "b3",
+          "next": "b6",
+          "inputs": {
+            "VALUE": [
+              3,
+              "b5",
+              [
+                10,
+                ""
+              ]
+            ]
+          },
+          "fields": {
+            "VARIABLE": [
+              "Read score",
+              "score"
+            ]
+          },
+          "shadow": false,
+          "topLevel": false
+        },
+        "b5": {
+          "opcode": "kubohiroyakvs_getValue",
+          "parent": "b4",
+          "next": null,
+          "inputs": {
+            "NAMESPACE": [
+              1,
+              [
+                10,
+                "turbowarp-kvs-sample"
+              ]
+            ],
+            "KEY": [
+              1,
+              [
+                10,
+                "sample-score"
+              ]
+            ]
+          },
+          "fields": {},
+          "shadow": false,
+          "topLevel": false
+        },
+        "b6": {
+          "opcode": "data_setvariableto",
+          "parent": "b4",
+          "next": "b8",
+          "inputs": {
+            "VALUE": [
+              3,
+              "b7",
+              [
+                10,
+                ""
+              ]
+            ]
+          },
+          "fields": {
+            "VARIABLE": [
+              "Exists before deletion",
+              "exists"
+            ]
+          },
+          "shadow": false,
+          "topLevel": false
+        },
+        "b7": {
+          "opcode": "kubohiroyakvs_hasKey",
+          "parent": "b6",
+          "next": null,
+          "inputs": {
+            "NAMESPACE": [
+              1,
+              [
+                10,
+                "turbowarp-kvs-sample"
+              ]
+            ],
+            "KEY": [
+              1,
+              [
+                10,
+                "sample-score"
+              ]
+            ]
+          },
+          "fields": {},
+          "shadow": false,
+          "topLevel": false
+        },
+        "b8": {
+          "opcode": "kubohiroyakvs_deleteKey",
+          "parent": "b6",
+          "next": "b9",
+          "inputs": {
+            "NAMESPACE": [
+              1,
+              [
+                10,
+                "turbowarp-kvs-sample"
+              ]
+            ],
+            "KEY": [
+              1,
+              [
+                10,
+                "sample-score"
+              ]
+            ]
+          },
+          "fields": {},
+          "shadow": false,
+          "topLevel": false
+        },
+        "b9": {
+          "opcode": "data_setvariableto",
+          "parent": "b8",
+          "next": "b11",
+          "inputs": {
+            "VALUE": [
+              3,
+              "b10",
+              [
+                10,
+                ""
+              ]
+            ]
+          },
+          "fields": {
+            "VARIABLE": [
+              "Exists after deletion",
+              "deleted"
+            ]
+          },
+          "shadow": false,
+          "topLevel": false
+        },
+        "b10": {
+          "opcode": "kubohiroyakvs_hasKey",
+          "parent": "b9",
+          "next": null,
+          "inputs": {
+            "NAMESPACE": [
+              1,
+              [
+                10,
+                "turbowarp-kvs-sample"
+              ]
+            ],
+            "KEY": [
+              1,
+              [
+                10,
+                "sample-score"
+              ]
+            ]
+          },
+          "fields": {},
+          "shadow": false,
+          "topLevel": false
+        },
+        "b11": {
+          "opcode": "data_setvariableto",
+          "parent": "b9",
+          "next": null,
+          "inputs": {
+            "VALUE": [
+              1,
+              [
+                10,
+                "Ready"
+              ]
+            ]
+          },
+          "fields": {
+            "VARIABLE": [
+              "Sample state",
+              "sample-state"
+            ]
+          },
+          "shadow": false,
+          "topLevel": false
+        }
+      },
+      "comments": {},
+      "currentCostume": 0,
+      "costumes": [
+        {
+          "assetId": "",
+          "name": "Instructions",
+          "bitmapResolution": 1,
+          "md5ext": "backdrop.svg",
+          "dataFormat": "svg",
+          "rotationCenterX": 240,
+          "rotationCenterY": 180
+        }
+      ],
+      "sounds": [],
+      "volume": 100,
+      "layerOrder": 0,
+      "tempo": 60,
+      "videoTransparency": 50,
+      "videoState": "off",
+      "textToSpeechLanguage": null
+    }
+  ],
+  "monitors": [
+    {
+      "id": "score",
+      "mode": "default",
+      "opcode": "data_variable",
+      "params": {
+        "VARIABLE": "Read score"
+      },
+      "spriteName": null,
+      "value": "",
+      "width": 0,
+      "height": 0,
+      "x": 18,
+      "y": 115,
+      "visible": true,
+      "sliderMin": 0,
+      "sliderMax": 100,
+      "isDiscrete": true
+    },
+    {
+      "id": "exists",
+      "mode": "default",
+      "opcode": "data_variable",
+      "params": {
+        "VARIABLE": "Exists before deletion"
+      },
+      "spriteName": null,
+      "value": "",
+      "width": 0,
+      "height": 0,
+      "x": 18,
+      "y": 148,
+      "visible": true,
+      "sliderMin": 0,
+      "sliderMax": 100,
+      "isDiscrete": true
+    },
+    {
+      "id": "deleted",
+      "mode": "default",
+      "opcode": "data_variable",
+      "params": {
+        "VARIABLE": "Exists after deletion"
+      },
+      "spriteName": null,
+      "value": "",
+      "width": 0,
+      "height": 0,
+      "x": 18,
+      "y": 181,
+      "visible": true,
+      "sliderMin": 0,
+      "sliderMax": 100,
+      "isDiscrete": true
+    }
+  ],
+  "extensions": [],
+  "meta": {
+    "semver": "3.0.0",
+    "vm": "0.2.0",
+    "agent": "TurboWarp Plus minimal samples"
+  }
+}

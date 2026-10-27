@@ -1,0 +1,29 @@
+{
+  "baseURL": "https://kubohiroya.github.io/turbowarp-kvs/",
+  "extension": {
+    "id": "kubohiroyakvs",
+    "bundle": "dist/kvs.js",
+    "unsandboxed": true
+  },
+  "samples": [
+    {
+      "name": "save-and-read-score",
+      "title": "Kvs minimal demo",
+      "checks": [
+        {
+          "variable": "score",
+          "equals": "42"
+        },
+        {
+          "variable": "exists",
+          "equals": true
+        },
+        {
+          "variable": "deleted",
+          "equals": false
+        }
+      ],
+      "instructions": "Read score 42; key exists before deletion and is absent after."
+    }
+  ]
+}

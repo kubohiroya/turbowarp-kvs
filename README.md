@@ -6,6 +6,16 @@ English | [日本語](README.ja.md)
 
 Portable namespace/key storage for TurboWarp projects and server compilation. Text values use IndexedDB in the browser. The package also exports the IndexedDB/OPFS `BinaryObjectStore` contract extracted from TurboWarp Asset Manager; binary bytes never pass through Scratch string values or the extension manifest.
 
+## Runnable sample
+
+[**Open the demo in TurboWarp Editor**](https://turbowarp.org/editor?project_url=https%3A%2F%2Fkubohiroya.github.io%2Fturbowarp-kvs%2Fsamples%2Fsave-and-read-score.sb3) · [Download the SB3](https://kubohiroya.github.io/turbowarp-kvs/samples/save-and-read-score.sb3)
+
+Select **Run without sandbox**, then **Allow**, and click the green flag.
+Read score 42; key exists before deletion and is absent after.
+
+Editable sources and expected results: [`samples/README.md`](samples/README.md).
+Run `pnpm run samples:build` after source/bundle changes and `pnpm run samples:check` before committing.
+
 ## What it does
 
 - Stores text values by explicit namespace and key.

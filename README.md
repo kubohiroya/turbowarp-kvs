@@ -30,7 +30,7 @@ Load `dist/kvs.js` as an unsandboxed extension because browser persistence requi
 ## Installation
 
 ```sh
-pnpm add --save-exact @kubohiroya/turbowarp-kvs@0.5.1
+pnpm add --save-exact @kubohiroya/turbowarp-kvs@0.6.0
 ```
 
 ## Block reference

@@ -1,6 +1,6 @@
 {
   "name": "@kubohiroya/turbowarp-kvs",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "A portable namespace and key value store extension for TurboWarp.",
   "author": {
     "name": "Hiroya Kubo",
@@ -93,5 +93,20 @@
     "typescript-eslint": "^8.66.0",
     "vite": "^8.2.2",
     "vitest": "^5.0.0"
+  },
+  "turbowarpExtension": {
+    "resourceDeclaration": {
+      "schemaVersion": 1,
+      "resources": [
+        {
+          "type": "storage",
+          "usage": "required",
+          "purpose": {
+            "en": "Read and write persistent namespace/key values",
+            "ja": "名前空間・キーごとの永続データを読み書きする"
+          }
+        }
+      ]
+    }
   }
 }
